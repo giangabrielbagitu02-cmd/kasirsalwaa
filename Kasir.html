@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <title>NASGOR SALWA</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root{
+      --bg:#0f172a;        /* sidebar dark */
+      --bg2:#111827;       /* header dark */
+      --panel:#1f2937;     /* main panel */
+      --card:#111827;      /* item card */
+      --text:#e5e7eb;      /* light text */
+      --muted:#9ca3af;     /* muted text */
+      --accent:#22c55e;    /* green */
+      --accent2:#3b82f6;   /* blue */
+      --danger:#ef4444;    /* red */
+      --border:#374151;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0; background:#0b1220; color:var(--text);
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial;
+      display:flex; min-height:100vh;
+    }
+    /* Sidebar */
+    .sidebar{
+      width:240px; background:var(--bg); border-right:1px solid var(--border);
+      display:flex; flex-direction:column; padding:20px;
+    }
+    .brand{
+      font-weight:700; letter-spacing:.5px; margin-bottom:24px;
+    }
+    .nav a{
+      display:block; padding:10px 12px; border-radius:8px; color:var(--text);
+      text-decoration:none; margin-bottom:8px; background:transparent; border:1px solid transparent;
+    }
+    .nav a.active{ background:#0b1a2f; border-color:#1f3b63 }
+    .nav a:hover{ background:#0d213f }
+    .logout{ margin-top:auto }
+    /* Main */
+    .main{ flex:1; display:flex; flex-direction:column }
+    .topbar{
+      background:var(--bg2); border-bottom:1px solid var(--border);
+      padding:12px 20px; display:flex; align-items:center; gap:12px;
+    }
+    .search{
+      flex:1; position:relative;
+    }
+    .search input{
+      width:100%; padding:10px 12px; border-radius:8px; border:1px solid var(--border);
+      background:#0b1a2f; color:var(--text);
+    }
+    .user{
+      display:flex; align-items:center; gap:8px; font-size:14px; color:var(--muted);
+    }
+    .status{ color:#22c55e; font-weight:600 }
+    .content{
+      display:grid; grid-template-columns:1fr 360px; gap:16px; padding:16px;
+    }
+    .panel{
+      background:var(--panel); border:1px solid var(--border); border-radius:12px; overflow:hidden;
+    }
+    .panel-header{
+      padding:14px 16px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:8px;
+    }
+    .tabs{ display:flex; gap:8px; flex-wrap:wrap }
+    .tab{
+      padding:8px 12px; border-radius:999px; border:1px solid var(--border);
+      background:#0b1a2f; color:var(--text); cursor:pointer; font-size:14px;
+    }
+    .tab.active{ background:#1f3b63; border-color:#3b82f6 }
+    .items{
+      padding:16px; display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:12px;
+    }
+    .card{
+      background:var(--card); border:1px solid var(--border); border-radius:12px; padding:12px;
+      display:flex; flex-direction:column; gap:6px;
+    }
+    .name{ font-weight:600 }
+    .meta{ font-size:13px; color:var(--muted) }
+    .price{ font-weight:700; color:#fbbf24 }
+    .code{ font-size:12px; color:#93c5fd }
+    .stock{ font-size:12px; color:#a7f3d0 }
+    .add{
+      margin-top:8px; padding:8px 10px; border-radius:8px; border:1px solid #1f3b63;
+      background:#0b1a2f; color:#93c5fd; cursor:pointer;
+    }
+    .add:hover{ background:#0d213f }
+    /* Cart */
+    .cart{
+      background:var(--panel); border:1px solid var(--border); border-radius:12px; display:flex; flex-direction:column;
+    }
+    .cart-header{ padding:14px 16px; border-bottom:1px solid var(--border); font-weight:700 }
+    .cart-body{ padding:12px 16px; flex:1; overflow:auto }
+    .empty{ color:var(--muted); font-style:italic }
+    .cart-item{
+      display:grid; grid-template-columns:1fr auto auto 24px; align-items:center; gap:8px;
+      padding:8px; border:1px dashed var(--border); border-radius:8px; margin-bottom:8px;
+    }
+    .qty{
+      display:flex; align-items:center; gap:6px;
+    }
+    .qty button{
+      width:24px; height:24px; border-radius:6px; border:1px solid var(--border);
+      background:#0b1a2f; color:var(--text); cursor:pointer;
+    }
+    .remove{
+      width:24px; height:24px; border:none; background:transparent; color:var(--danger); cursor:pointer; font-weight:900;
+    }
+    .cart-footer{
+      border-top:1px solid var(--border); padding:12px 16px; display:flex; flex-direction:column; gap:8px;
+    }
+    .total{
+      display:flex; justify-content:space-between; align-items:center; font-weight:700;
+    }
+    .pay{
+      padding:10px 12px; border-radius:8px; border:1px solid #14532d; background:#0b2a1a; color:#86efac; cursor:pointer;
+      font-weight:700;
+    }
+    .pay:hover{ background:#0d3a24 }
+    /* Modal (Struk) */
+    .modal-backdrop{
+      position:fixed; inset:0; background:rgba(0,0,0,.6); display:none; align-items:center; justify-content:center; z-index:50;
+    }
+    .modal{
+      width:420px; background:#ffffff; color:#111827; border-radius:12px; overflow:hidden;
+      box-shadow:0 20px 40px rgba(0,0,0,.4);
+    }
+    .modal-header{
+      padding:12px 16px; border-bottom:1px solid #e5e7eb; display:flex; justify-content:space-between; align-items:center;
+    }
+    .modal-body{ padding:16px }
+    .modal-actions{
+      padding:12px 16px; border-top:1px solid #e5e7eb; display:flex; gap:8px; justify-content:flex-end;
+    }
+    .btn{ padding:8px 12px; border-radius:8px; border:1px solid #d1d5db; background:#f9fafb; cursor:pointer }
+    .btn.primary{ background:#2563eb; color:#fff; border-color:#1d4ed8 }
+    .btn.danger{ background:#ef4444; color:#fff; border-color:#dc2626 }
+    /* Print styles: hanya area struk */
+    @media print{
+      body{ background:#fff }
+      .sidebar,.topbar,.content,.modal-actions{ display:none !important }
+      .modal{ width:auto; box-shadow:none; border:none }
+      .modal-header{ border:none }
+      .modal-body{ padding:0 }
+    }
+  </style>
+</head>
+<body>
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="brand">NASGOR SALWA</div>
+    <nav class="nav">
+      <a class="active" href="#">Kasir (POS)</a>
+      <a href="#">Stok & Menu</a>
+      <a href="#">Laporan</a>
+    </nav>
+    <a class="nav logout" href="#">Keluar</a>
+  </aside>
+
+  <!-- Main -->
+  <main class="main">
+    <div class="topbar">
+      <div class="search">
+        <input id="searchInput" type="text" placeholder="Cari..." />
+      </div>
+      <div class="user">
+        <span>Admin Salwa</span>
+        <span class="status">ONLINE</span>
+      </div>
+    </div>
+
+    <div class="content">
+      <!-- Panel Kasir -->
+      <section class="panel">
+        <div class="panel-header">
+          <strong>KASIR SALWA</strong>
+        </div>
+        <div class="panel-header">
+          <div class="tabs" id="tabs">
+            <button class="tab active" data-cat="Semua">Semua</button>
+            <button class="tab" data-cat="Nasi Goreng">Nasi Goreng</button>
+            <button class="tab" data-cat="Kwetiau">Kwetiau</button>
+            <button class="tab" data-cat="Capcai">Capcai</button>
+          </div>
+        </div>
+        <div class="items" id="items"></div>
+      </section>
+
+      <!-- Keranjang -->
+      <aside class="cart">
+        <div class="cart-header">KERANJANG</div>
+        <div class="cart-body" id="cartBody">
+          <div class="empty">KOSONG</div>
+        </div>
+        <div class="cart-footer">
+          <div class="total">
+            <span>TOTAL</span>
+            <span>Rp <span id="grandTotal">0</span></span>
+          </div>
+          <button class="pay" id="payBtn">LANJUT BAYAR</button>
+        </div>
+      </aside>
+    </div>
+  </main>
+
+  <!-- Modal Struk -->
+  <div class="modal-backdrop" id="modalBackdrop" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true">
+      <div class="modal-header">
+        <strong>Struk Pembayaran</strong>
+        <button class="btn danger" id="closeModal">Tutup</button>
+      </div>
+      <div class="modal-body" id="receiptArea">
+        <!-- Isi struk akan di-render via JS -->
+      </div>
+      <div class="modal-actions">
+        <button class="btn" id="printBtn">Cetak</button>
+        <button class="btn primary" id="finishBtn">Selesai</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Data menu (sesuai gambar)
+    const MENU = [
+      { nama:"Nasi Goreng Spesial", harga:20000, kode:"NG-SPL", stok:50, kategori:"Nasi Goreng" },
+      { nama:"Nasi Goreng Ati Ampela", harga:18000, kode:"NG-ATA", stok:30, kategori:"Nasi Goreng" },
+      { nama:"Nasi Goreng Sosis", harga:16000, kode:"NG-SSS", stok:40, kategori:"Nasi Goreng" },
+      { nama:"Nasi Goreng Biasa", harga:15000, kode:"NG-BIA", stok:100, kategori:"Nasi Goreng" },
+      { nama:"Kwetiau Goreng", harga:15000, kode:"KW-GRG", stok:25, kategori:"Kwetiau" },
+      { nama:"Kwetiau Kuah", harga:15000, kode:"KW-KUA", stok:20, kategori:"Kwetiau" },
+      { nama:"Capcai Goreng", harga:15000, kode:"CP-GRG", stok:15, kategori:"Capcai" },
+      { nama:"Capcai Kuah", harga:15000, kode:"CP-KUA", stok:15, kategori:"Capcai" },
+    ];
+
+    // State
+    let activeCat = "Semua";
+    let searchTerm = "";
+    let cart = []; // {kode, nama, harga, qty}
+    let orderCounter = 4247; // tampilkan #4247 seperti di gambar
+
+    // Utils
+    const rupiah = n => (n||0).toLocaleString("id-ID");
+    const nowStr = () => {
+      const d = new Date();
+      const pad = x => String(x).padStart(2,"0");
+      return `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    };
+
+    // Render items
+    function renderItems(){
+      const wrap = document.getElementById("items");
+      wrap.innerHTML = "";
+      const filtered = MENU.filter(m => {
+        const catOK = activeCat==="Semua" || m.kategori===activeCat;
+        const searchOK = !searchTerm || m.nama.toLowerCase().includes(searchTerm) || m.kode.toLowerCase().includes(searchTerm);
+        return catOK && searchOK;
+      });
+      filtered.forEach(m => {
+        const card = document.createElement("div");
+        card.className = "card";
+        card.innerHTML = `
+          <div class="name">${m.nama}</div>
+          <div class="price">Rp ${rupiah(m.harga)}</div>
+          <div class="meta">
+            <span class="code">${m.kode}</span> &nbsp;•&nbsp;
+            <span class="stock">${m.stok} STOK</span>
+          </div>
+          <button class="add" data-kode="${m.kode}">Tambah</button>
+        `;
+        wrap.appendChild(card);
+      });
+      // bind add buttons
+      wrap.querySelectorAll(".add").forEach(btn=>{
+        btn.addEventListener("click",()=> addToCart(btn.dataset.kode));
+      });
+    }
+
+    // Tabs
+    document.getElementById("tabs").addEventListener("click", e=>{
+      const t = e.target.closest(".tab");
+      if(!t) return;
+      document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
+      t.classList.add("active");
+      activeCat = t.dataset.cat;
+      renderItems();
+    });
+
+    // Search
+    document.getElementById("searchInput").addEventListener("input", e=>{
+      searchTerm = e.target.value.trim().toLowerCase();
+      renderItems();
+    });
+
+    // Cart ops
+    function addToCart(kode){
+      const item = MENU.find(m=>m.kode===kode);
+      if(!item || item.stok<=0) return;
+      const existing = cart.find(c=>c.kode===kode);
+      if(existing){
+        if(item.stok - 1 < 0) return;
+        existing.qty += 1;
+      }else{
+        cart.push({ kode:item.kode, nama:item.nama, harga:item.harga, qty:1 });
+      }
+      item.stok -= 1;
+      renderItems();
+      renderCart();
+    }
+    function inc(kode){
+      const item = MENU.find(m=>m.kode===kode);
+      const c = cart.find(x=>x.kode===kode);
+      if(!item || !c) return;
+      if(item.stok<=0) return;
+      c.qty += 1;
+      item.stok -= 1;
+      renderItems();
+      renderCart();
+    }
+    function dec(kode){
+      const item = MENU.find(m=>m.kode===kode);
+      const c = cart.find(x=>x.kode===kode);
+      if(!item || !c) return;
+      c.qty -= 1;
+      item.stok += 1;
+      if(c.qty<=0){
+        cart = cart.filter(x=>x.kode!==kode);
+      }
+      renderItems();
+      renderCart();
+    }
+    function remove(kode){
+      const item = MENU.find(m=>m.kode===kode);
+      const c = cart.find(x=>x.kode===kode);
+      if(!item || !c) return;
+      item.stok += c.qty;
+      cart = cart.filter(x=>x.kode!==kode);
+      renderItems();
+      renderCart();
+    }
+    function cartTotal(){
+      return cart.reduce((s,x)=>s + x.harga * x.qty, 0);
+    }
+    function renderCart(){
+      const body = document.getElementById("cartBody");
+      body.innerHTML = "";
+      if(cart.length===0){
+        body.innerHTML = `<div class="empty">KOSONG</div>`;
+      }else{
+        cart.forEach(c=>{
+          const row = document.createElement("div");
+          row.className = "cart-item";
+          row.innerHTML = `
+            <div>
+              <div style="font-weight:600">${c.nama}</div>
+              <div style="font-size:12px;color:#6b7280">${c.kode}</div>
+            </div>
+            <div style="color:#f59e0b;font-weight:700">Rp ${rupiah(c.harga)}</div>
+            <div class="qty">
+              <button data-kode="${c.kode}" data-act="dec">-</button>
+              <span>${c.qty}</span>
+              <button data-kode="${c.kode}" data-act="inc">+</button>
+            </div>
+            <button class="remove" title="Hapus" data-kode="${c.kode}">×</button>
+          `;
+          body.appendChild(row);
+        });
+      }
+      document.getElementById("grandTotal").textContent = rupiah(cartTotal());
+      // bind qty & remove
+      body.querySelectorAll(".qty button").forEach(b=>{
+        const kode = b.dataset.kode;
+        const act = b.dataset.act;
+        b.addEventListener("click", ()=> act==="inc" ? inc(kode) : dec(kode));
+      });
+      body.querySelectorAll(".remove").forEach(b=>{
+        b.addEventListener("click", ()=> remove(b.dataset.kode));
+      });
+    }
+
+    // Payment & receipt
+    document.getElementById("payBtn").addEventListener("click", ()=>{
+      if(cart.length===0) return;
+      showReceipt();
+    });
+
+    function showReceipt(){
+      const modal = document.getElementById("modalBackdrop");
+      const area = document.getElementById("receiptArea");
+      const orderNo = `#${orderCounter}`;
+      const total = cartTotal();
+      const cashier = "Admin Salwa";
+      const date = nowStr();
+
+      // Build receipt HTML
+      area.innerHTML = `
+        <div style="padding:16px">
+          <div style="text-align:center; margin-bottom:8px">
+            <div style="font-weight:800; font-size:18px">SALWA WEB POS</div>
+            <div style="color:#6b7280; font-size:12px">Struk Pembayaran</div>
+          </div>
+          <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:8px">
+            <div><strong>Kasir:</strong> ${cashier}</div>
+            <div><strong>Order:</strong> ${orderNo}</div>
+          </div>
+          <div style="font-size:12px; color:#6b7280; margin-bottom:8px">${date}</div>
+          <hr />
+          <table style="width:100%; font-size:12px; margin-top:8px">
+            <thead>
+              <tr>
+                <th style="text-align:left">Item</th>
+                <th style="text-align:center">Qty</th>
+                <th style="text-align:right">Harga</th>
+                <th style="text-align:right">Subtotal</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${cart.map(c=>`
+                <tr>
+                  <td>${c.nama}</td>
+                  <td style="text-align:center">${c.qty}</td>
+                  <td style="text-align:right">Rp ${rupiah(c.harga)}</td>
+                  <td style="text-align:right">Rp ${rupiah(c.harga*c.qty)}</td>
+                </tr>
+              `).join("")}
+            </tbody>
+          </table>
+          <hr />
+          <div style="display:flex; justify-content:flex-end; gap:16px; margin-top:8px">
+            <div style="font-weight:700">TOTAL</div>
+            <div style="font-weight:800">Rp ${rupiah(total)}</div>
+          </div>
+          <div style="text-align:center; color:#6b7280; font-size:12px; margin-top:12px">
+            Terima kasih! — Barang yang sudah dibeli tidak dapat dikembalikan.
+          </div>
+        </div>
+      `;
+      modal.style.display = "flex";
+
+      // Actions
+      document.getElementById("printBtn").onclick = ()=> window.print();
+      document.getElementById("finishBtn").onclick = ()=>{
+        // reset cart & increment order
+        cart = [];
+        orderCounter += 1;
+        renderCart();
+        modal.style.display = "none";
+      };
+    }
+    document.getElementById("closeModal").addEventListener("click", ()=>{
+      document.getElementById("modalBackdrop").style.display = "none";
+    });
+    document.getElementById("modalBackdrop").addEventListener("click", e=>{
+      if(e.target.id==="modalBackdrop"){
+        e.currentTarget.style.display = "none";
+      }
+    });
+
+    // Init
+    renderItems();
+    renderCart();
+  </script>
+</body>
+</html>
